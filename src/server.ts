@@ -80,21 +80,62 @@ interface WooCommerceOrder {
   date_completed?: string | null;
   total: string;
   customer_id: number;
+  currency_symbol?: string;
+  shipping_total: string;
+  discount_total: string;
+  total_tax: string;
+  transaction_id?: string;
   billing: {
     first_name: string;
     last_name: string;
     email: string;
     phone: string;
+    company?: string;
+    address_1: string;
+    address_2?: string;
+    city: string;
+    state?: string;
+    postcode: string;
+    country: string;
+  };
+  shipping: {
+    first_name: string;
+    last_name: string;
+    company?: string;
+    address_1: string;
+    address_2?: string;
+    city: string;
+    state?: string;
+    postcode: string;
+    country: string;
+    phone?: string;
   };
   payment_method: string;
   payment_method_title: string;
+  shipping_lines?: Array<{
+    id: number;
+    method_title: string;
+    total: string;
+  }>;
   line_items: Array<{
     id: number;
     name: string;
     quantity: number;
     total: string;
+    price: string | number;
+    sku?: string;
+    image?: {
+      id?: string;
+      src?: string;
+    };
+    meta_data?: Array<{
+      id: number;
+      key: string;
+      value: string;
+      display_key?: string;
+      display_value?: string;
+    }>;
   }>;
-  // Add other fields as needed
 }
 
 // Function to save or update an order
@@ -999,7 +1040,7 @@ app.get('/admin/orders/:orderNumber', async (req: Request, res: Response): Promi
                   </div>
                 </td>
                 <td>${item.quantity}</td>
-                <td>${order.currency_symbol || '£'}${parseFloat(item.price).toFixed(2)}</td>
+                <td>${order.currency_symbol || '£'}${parseFloat(String(item.price)).toFixed(2)}</td>
                 <td>${order.currency_symbol || '£'}${parseFloat(item.total).toFixed(2)}</td>
               </tr>
             `).join('')}
