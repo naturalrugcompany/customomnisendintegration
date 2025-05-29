@@ -154,13 +154,31 @@ app.post('/webhooks/woocommerce/order-created', validateWebhookSignature('order-
   const logTimestamp = new Date().toISOString();
   console.log(`[${logTimestamp}] Received order.created webhook.`);
   
-  const payload = req.body;
+  // Get payload from either parsed JSON body or raw body
+  let payload = req.body;
+  
+  // If req.body is undefined, try to parse the raw body as a fallback
+  if (!payload && (req as any).rawBody) {
+    try {
+      payload = JSON.parse((req as any).rawBody);
+      console.log('Using parsed raw body as fallback');
+    } catch (e) {
+      console.log('Failed to parse raw body as JSON:', e);
+      // Store raw body as string if JSON parsing fails
+      payload = { rawContent: (req as any).rawBody };
+    }
+  }
   
   // Write the payload to the example-payloads directory with timestamp
   const fileTimestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const filename = `order_created_${fileTimestamp}.json`;
   
   try {
+    // Check if payload exists before writing
+    if (!payload) {
+      throw new Error('No payload data found in request');
+    }
+    
     await writeFileAsync(
       path.join(PAYLOADS_DIR, filename),
       JSON.stringify(payload, null, 2)
@@ -180,13 +198,31 @@ app.post('/webhooks/woocommerce/order-updated', validateWebhookSignature('order-
   const logTimestamp = new Date().toISOString();
   console.log(`[${logTimestamp}] Received order.updated webhook.`);
   
-  const payload = req.body;
+  // Get payload from either parsed JSON body or raw body
+  let payload = req.body;
+  
+  // If req.body is undefined, try to parse the raw body as a fallback
+  if (!payload && (req as any).rawBody) {
+    try {
+      payload = JSON.parse((req as any).rawBody);
+      console.log('Using parsed raw body as fallback');
+    } catch (e) {
+      console.log('Failed to parse raw body as JSON:', e);
+      // Store raw body as string if JSON parsing fails
+      payload = { rawContent: (req as any).rawBody };
+    }
+  }
   
   // Write the payload to the example-payloads directory with timestamp
   const fileTimestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const filename = `order_updated_${fileTimestamp}.json`;
   
   try {
+    // Check if payload exists before writing
+    if (!payload) {
+      throw new Error('No payload data found in request');
+    }
+    
     await writeFileAsync(
       path.join(PAYLOADS_DIR, filename),
       JSON.stringify(payload, null, 2)
