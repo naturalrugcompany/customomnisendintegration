@@ -6,19 +6,27 @@ A webhook receiver application designed to capture and store WooCommerce webhook
 
 This application:
 - Receives webhooks from WooCommerce
-- Validates webhook signatures for security
-- Stores JSON payloads with timestamps for analysis
+- Validates webhook signatures using HMAC SHA256
+- Stores JSON payloads with timestamps in an organized directory
+- Provides a beautiful web interface to view and analyze webhook payloads
 - Is optimized for deployment on Railway
 
-## Webhook Endpoints
+## Application Endpoints
 
-The application exposes two primary webhook endpoints:
+### Webhook Endpoints
 
 - **Order Created**: `POST /webhooks/woocommerce/order-created`
 - **Order Updated**: `POST /webhooks/woocommerce/order-updated`
 
-And a health check endpoint:
-- `GET /` - Returns service status information
+### Admin Interface
+
+- **Payload List**: `GET /admin/payloads` - Web interface showing all captured webhooks
+- **View JSON Payload**: `GET /admin/payloads/:filename` - Raw JSON data for a specific webhook
+- **View Formatted Payload**: `GET /admin/payloads/view/:filename` - User-friendly interface for viewing webhook details
+
+### Other Endpoints
+
+- **Health Check**: `GET /` - Returns service status information
 
 ## Deployment to Railway
 
@@ -49,6 +57,7 @@ And a health check endpoint:
    - In Railway project settings, add the following environment variables:
      - `WC_ORDER_CREATED_SECRET`: Your WooCommerce order.created webhook secret
      - `WC_ORDER_UPDATED_SECRET`: Your WooCommerce order.updated webhook secret
+     - `NODE_ENV`: Set to `production`
 
 4. **Get Your Deployment URL**
    - Once deployed, Railway will provide a URL for your application
@@ -98,6 +107,29 @@ And a health check endpoint:
    WC_ORDER_UPDATED_SECRET=your_secret_here
    ```
 4. Run in development mode: `npm run dev`
+
+## Key Features
+
+### Beautiful Admin Interface
+
+The application includes a user-friendly admin interface that allows you to:
+
+- View a list of all received webhooks with metadata
+- See nicely formatted order information from webhooks
+- Access and copy the raw JSON payload data
+- Automatically refresh to show new webhooks as they arrive
+
+### Robust Webhook Signature Validation
+
+- Implements proper HMAC SHA256 signature validation according to WooCommerce specs
+- Captures raw request bodies to ensure exact signature matching
+- Provides detailed logging for troubleshooting signature issues
+
+### Secure Storage
+
+- Stores webhooks with timestamps to prevent overwriting
+- Organizes payloads in the `example-payloads` directory
+- Makes payloads accessible through the web interface
 
 ## Next Steps (Phase 2)
 
