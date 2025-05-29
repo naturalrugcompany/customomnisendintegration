@@ -1,0 +1,33 @@
+{
+  "name": "omnisend-custom-integration",
+  "version": "1.0.0",
+  "main": "dist/server.js",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "nodemon src/server.ts",
+    "postinstall": "npm run build"
+  },
+  "keywords": [
+    "woocommerce",
+    "webhook",
+    "omnisend",
+    "ecommerce"
+  ],
+  "author": "",
+  "license": "ISC",
+  "description": "A webhook receiver for WooCommerce to integrate with Omnisend",
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.2",
+    "@types/node": "^22.15.24",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
