@@ -69,6 +69,13 @@ const validateWebhookSignature = (webhookType: 'order-created' | 'order-updated'
       const hmac = crypto.createHmac('sha256', secret);
       const digest = hmac.update(payload).digest('base64');
       
+      // Add debug logging
+      console.log('Debug - Signature verification:');
+      console.log(`Received signature: ${signature}`);
+      console.log(`Calculated digest: ${digest}`);
+      console.log(`Secret used (first 4 chars): ${secret.substring(0, 4)}...`);
+      console.log(`Payload length: ${payload.length} characters`);
+      
       // Compare the calculated signature with the one in the header
       if (signature === digest) {
         console.log('Webhook signature validated successfully');
