@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { promisify } from 'util';
+import { promises as fsPromises } from 'fs';
 
 // Initialize Express app
 const app = express();
@@ -149,9 +150,77 @@ app.get('/', (req: Request, res: Response): void => {
     service: 'WooCommerce Webhook Receiver',
     endpoints: [
       '/webhooks/woocommerce/order-created',
-      '/webhooks/woocommerce/order-updated'
+      '/webhooks/woocommerce/order-updated',
+      '/admin/payloads',
+      '/admin/payloads/:filename'
     ]
   });
+});
+
+// Admin endpoint to list all payload files
+app.get('/admin/payloads', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const files = await fsPromises.readdir(PAYLOADS_DIR);
+    const fileDetails = await Promise.all(
+      files.map(async (filename) => {
+        const filePath = path.join(PAYLOADS_DIR, filename);
+        const stats = await fsPromises.stat(filePath);
+        return {
+          filename,
+          size: stats.size,
+          created: stats.mtime,
+          type: filename.includes('order_created') ? 'order_created' : 'order_updated'
+        };
+      })
+    );
+    
+    res.status(200).json({
+      count: files.length,
+      files: fileDetails.sort((a, b) => b.created.getTime() - a.created.getTime()) // Sort newest first
+    });
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error(`Error listing payload files: ${err.message}`);
+    res.status(500).json({ error: 'Failed to list payload files', message: err.message });
+  }
+});
+
+// Admin endpoint to view a specific payload file
+app.get('/admin/payloads/:filename', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const filename = req.params.filename;
+    
+    // Basic security check to prevent directory traversal
+    if (filename.includes('../') || filename.includes('..\\')) {
+      res.status(400).json({ error: 'Invalid filename' });
+      return;
+    }
+    
+    const filePath = path.join(PAYLOADS_DIR, filename);
+    
+    // Check if file exists
+    try {
+      await fsPromises.access(filePath, fs.constants.R_OK);
+    } catch {
+      res.status(404).json({ error: 'Payload file not found' });
+      return;
+    }
+    
+    // Read and return the file content
+    const content = await fsPromises.readFile(filePath, 'utf8');
+    
+    // Try to parse as JSON, if it fails, return as text
+    try {
+      const jsonContent = JSON.parse(content);
+      res.status(200).json(jsonContent);
+    } catch {
+      res.status(200).send(content);
+    }
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error(`Error reading payload file: ${err.message}`);
+    res.status(500).json({ error: 'Failed to read payload file', message: err.message });
+  }
 });
 
 // Start the server
