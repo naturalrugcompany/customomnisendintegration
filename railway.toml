@@ -1,6 +1,7 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm run build"
+buildCommand = "npm ci --omit=dev && npm run build"
+watchPatterns = ["package.json", "package-lock.json", "src/**/*.ts", "tsconfig.json"]
 
 [deploy]
 startCommand = "npm start"

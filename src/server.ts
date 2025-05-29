@@ -688,7 +688,8 @@ app.get('/admin/orders/:orderNumber', async (req: Request, res: Response): Promi
     try {
       await fsPromises.access(orderFilePath, fs.constants.F_OK);
     } catch (error) {
-      return res.status(404).send(`<h1>Error</h1><p>Order #${orderNumber} not found</p>`);
+      res.status(404).send(`<h1>Error</h1><p>Order #${orderNumber} not found</p>`);
+      return;
     }
     
     // Read and parse order data
